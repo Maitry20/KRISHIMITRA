@@ -41,12 +41,19 @@ export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, fa
 
     const activeCrop = overrideCrop || examCropName || leafData?.crop || farmSetup.crop || 'Crop';
 
-    // Perform real computer vision pixel analysis tuned for the specified crop
-    const realAnalysis = await analyzeUploadedLeafImage(targetSrc, activeCrop);
+    // Perform real computer vision pixel analysis & crop feature detection
+    const realAnalysis = await analyzeUploadedLeafImage(
+      targetSrc,
+      activeCrop,
+      leafData?.title || leafData?.id || ''
+    );
+
+    const finalDetectedCrop = realAnalysis.detectedCrop || activeCrop;
+    setExamCropName(finalDetectedCrop);
 
     const mergedResult = {
       ...(leafData || {}),
-      crop: activeCrop,
+      crop: finalDetectedCrop,
       status: realAnalysis.status,
       condition: realAnalysis.condition,
       severity: realAnalysis.severity,
