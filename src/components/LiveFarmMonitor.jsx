@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sprout, MapPin, Sun, Thermometer, Droplets, CloudRain, Wind, Compass, Navigation, Loader2 } from 'lucide-react';
+import { Sprout, MapPin, Sun, Thermometer, Droplets, CloudRain, Wind, Compass, Navigation, Loader2, Check } from 'lucide-react';
 import { CROPS_LIST, SOIL_TYPES_LIST, GROWTH_STAGES_LIST, PRESET_LOCATIONS } from '../utils/aiModel';
 import { TRANSLATIONS } from '../utils/translations';
 import { detectDeviceLocationAndWeather } from '../utils/locationWeather';
@@ -9,36 +9,18 @@ export default function LiveFarmMonitor({ farmSetup, setFarmSetup, weatherData, 
 
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectStatusMessage, setDetectStatusMessage] = useState(null);
-  
-  // Check if current location or crop is custom
-  const isPresetLocation = PRESET_LOCATIONS.some(p => p.name === farmSetup.location);
-  const [isCustomLocationMode, setIsCustomLocationMode] = useState(!isPresetLocation);
 
-  const isPresetCrop = CROPS_LIST.some(c => c.id === farmSetup.crop);
-  const [isCustomCropMode, setIsCustomCropMode] = useState(!isPresetCrop);
-
-  // Handle Location Preset Selection
-  const handleLocationChange = (locName) => {
-    if (locName === 'CUSTOM') {
-      setIsCustomLocationMode(true);
-      return;
-    }
-
-    setIsCustomLocationMode(false);
-    const preset = PRESET_LOCATIONS.find(p => p.name === locName);
-    if (preset) {
-      setFarmSetup(prev => ({ ...prev, location: preset.name }));
-      setWeatherData({
-        temperature: preset.temp,
-        humidity: preset.humidity,
-        rainProbability: preset.rainProb,
-        rainfallForecast: preset.rainfall,
-        windSpeed: preset.wind,
-        condition: preset.condition,
-      });
-    } else {
-      setFarmSetup(prev => ({ ...prev, location: locName }));
-    }
+  // Handle Location Preset Chip Click
+  const handleLocationPresetClick = (preset) => {
+    setFarmSetup(prev => ({ ...prev, location: preset.name }));
+    setWeatherData({
+      temperature: preset.temp,
+      humidity: preset.humidity,
+      rainProbability: preset.rainProb,
+      rainfallForecast: preset.rainfall,
+      windSpeed: preset.wind,
+      condition: preset.condition,
+    });
   };
 
   // Handle Device Geolocation Detection
@@ -49,9 +31,8 @@ export default function LiveFarmMonitor({ farmSetup, setFarmSetup, weatherData, 
       const res = await detectDeviceLocationAndWeather();
       setFarmSetup(prev => ({ ...prev, location: res.locationName }));
       setWeatherData(res.weatherData);
-      setIsCustomLocationMode(false);
-      setDetectStatusMessage(`📍 Location detected: ${res.locationName}`);
-      setTimeout(() => setDetectStatusMessage(null), 4000);
+      setDetectStatusMessage(`📍 Detected: ${res.locationName}`);
+      setTimeout(() => setDetectStatusMessage(null), 4500);
     } catch (err) {
       alert(err.message || 'Could not detect device location.');
       setDetectStatusMessage(null);
@@ -60,22 +41,16 @@ export default function LiveFarmMonitor({ farmSetup, setFarmSetup, weatherData, 
     }
   };
 
-  // Handle Crop Selection
-  const handleCropChange = (cropVal) => {
-    if (cropVal === 'CUSTOM') {
-      setIsCustomCropMode(true);
-      setFarmSetup(prev => ({ ...prev, crop: prev.crop || 'Mustard' }));
-    } else {
-      setIsCustomCropMode(false);
-      setFarmSetup(prev => ({ ...prev, crop: cropVal }));
-    }
+  // Handle Crop Preset Chip Click
+  const handleCropPresetClick = (cropName) => {
+    setFarmSetup(prev => ({ ...prev, crop: cropName }));
   };
 
   return (
     <section id="monitor" style={{ padding: '60px 0', backgroundColor: '#ffffff' }}>
       <div className="container">
         
-        {/* Header */}
+        {/* Section Header */}
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary-700)', fontWeight: 700, fontSize: '0.88rem', marginBottom: '6px' }}>
             <Compass size={18} />
@@ -101,13 +76,13 @@ export default function LiveFarmMonitor({ farmSetup, setFarmSetup, weatherData, 
               <span>{t('cardFarmSetup')}</span>
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               
-              {/* Field 1: Location & Geolocation Detection */}
-              <div style={{ gridColumn: '1 / -1' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              {/* Field 1: Location Input & Geolocation Detection */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
                   <label style={labelStyle}>
-                    <MapPin size={15} color="var(--primary-700)" />
+                    <MapPin size={16} color="var(--primary-700)" />
                     <span>{t('labelLocation')}</span>
                   </label>
 
@@ -118,132 +93,187 @@ export default function LiveFarmMonitor({ farmSetup, setFarmSetup, weatherData, 
                     disabled={isDetecting}
                     style={{
                       border: 'none',
-                      background: 'var(--primary-100)',
+                      backgroundColor: isDetecting ? 'var(--neutral-200)' : 'var(--primary-100)',
                       color: 'var(--primary-900)',
-                      padding: '6px 12px',
+                      padding: '6px 14px',
                       borderRadius: '20px',
-                      fontSize: '0.78rem',
+                      fontSize: '0.8rem',
                       fontWeight: 700,
                       cursor: isDetecting ? 'wait' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px',
                       transition: 'all 0.2s ease',
-                      border: '1px solid var(--primary-300)'
+                      border: '1px solid var(--primary-300)',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.04)'
                     }}
                   >
                     {isDetecting ? (
-                      <Loader2 size={13} className="animate-spin" color="var(--primary-700)" />
+                      <Loader2 size={14} className="animate-spin" color="var(--primary-700)" />
                     ) : (
-                      <Navigation size={13} color="var(--primary-700)" />
+                      <Navigation size={14} color="var(--primary-700)" />
                     )}
                     <span>{isDetecting ? t('detectingLocation') : t('btnDetectLocation')}</span>
                   </button>
                 </div>
 
-                {/* Location Select or Custom Text Input */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <select
-                    value={isCustomLocationMode ? 'CUSTOM' : farmSetup.location}
-                    onChange={(e) => handleLocationChange(e.target.value)}
-                    style={inputStyle}
-                  >
-                    {PRESET_LOCATIONS.map(loc => (
-                      <option key={loc.name} value={loc.name}>
-                        {loc.name === 'CUSTOM' ? t('customLocationOption') || loc.name : loc.name}
-                      </option>
-                    ))}
-                  </select>
+                {/* Direct Text Input for Location */}
+                <input
+                  type="text"
+                  value={farmSetup.location || ''}
+                  onChange={(e) => setFarmSetup(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder={t('customLocationPlaceholder') || 'Type your location (e.g. Vadodara, Surat, Jaipur)...'}
+                  style={{
+                    ...inputStyle,
+                    borderColor: 'var(--primary-400)',
+                    backgroundColor: '#f8fafc',
+                    fontWeight: 700,
+                    fontSize: '0.95rem'
+                  }}
+                />
 
-                  {isCustomLocationMode && (
-                    <input
-                      type="text"
-                      value={farmSetup.location}
-                      onChange={(e) => setFarmSetup(prev => ({ ...prev, location: e.target.value }))}
-                      placeholder={t('customLocationPlaceholder')}
-                      style={{ ...inputStyle, borderColor: 'var(--primary-500)', backgroundColor: '#f0fdf4' }}
-                    />
-                  )}
-                </div>
-
+                {/* Status Message */}
                 {detectStatusMessage && (
-                  <div style={{ fontSize: '0.78rem', color: 'var(--primary-800)', marginTop: '4px', fontWeight: 600 }}>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--primary-800)', marginTop: '6px', fontWeight: 700 }}>
                     {detectStatusMessage}
                   </div>
                 )}
-              </div>
 
-              {/* Field 2: Crop Selection or Custom Input */}
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label style={labelStyle}>
-                  <Sprout size={15} color="var(--primary-700)" />
-                  <span>{t('labelCrop')}</span>
-                </label>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <select
-                    value={isCustomCropMode ? 'CUSTOM' : farmSetup.crop}
-                    onChange={(e) => handleCropChange(e.target.value)}
-                    style={inputStyle}
-                  >
-                    {CROPS_LIST.map(crop => (
-                      <option key={crop.id} value={crop.id}>
-                        {crop.icon} {crop.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  {isCustomCropMode && (
-                    <div>
-                      <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--primary-800)', marginBottom: '4px' }}>
-                        {t('labelCustomCrop')}:
-                      </div>
-                      <input
-                        type="text"
-                        value={farmSetup.crop}
-                        onChange={(e) => setFarmSetup(prev => ({ ...prev, crop: e.target.value }))}
-                        placeholder={t('customCropPlaceholder')}
-                        style={{ ...inputStyle, borderColor: 'var(--primary-500)', backgroundColor: '#f0fdf4' }}
-                      />
-                    </div>
-                  )}
+                {/* Preset Location Chips */}
+                <div style={{ marginTop: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                    Quick Presets:
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {PRESET_LOCATIONS.map(preset => {
+                      const isSelected = farmSetup.location === preset.name;
+                      return (
+                        <button
+                          key={preset.name}
+                          type="button"
+                          onClick={() => handleLocationPresetClick(preset)}
+                          style={{
+                            padding: '4px 12px',
+                            borderRadius: '16px',
+                            border: isSelected ? '1.5px solid var(--primary-600)' : '1px solid var(--neutral-300)',
+                            backgroundColor: isSelected ? 'var(--primary-100)' : '#ffffff',
+                            color: isSelected ? 'var(--primary-900)' : 'var(--neutral-700)',
+                            fontSize: '0.78rem',
+                            fontWeight: isSelected ? 700 : 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <MapPin size={11} color={isSelected ? 'var(--primary-700)' : 'var(--neutral-500)'} />
+                          <span>{preset.name.split(',')[0]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
-              {/* Field 3: Soil Type */}
+              {/* Field 2: Crop Selection or Direct Custom Input */}
               <div>
                 <label style={labelStyle}>
-                  <span>{t('labelSoil')}</span>
+                  <Sprout size={16} color="var(--primary-700)" />
+                  <span>{t('labelCrop')}</span>
                 </label>
-                <select
-                  value={farmSetup.soilType}
-                  onChange={(e) => setFarmSetup(prev => ({ ...prev, soilType: e.target.value }))}
-                  style={inputStyle}
-                >
-                  {SOIL_TYPES_LIST.map(soil => (
-                    <option key={soil.id} value={soil.id}>{soil.name}</option>
-                  ))}
-                </select>
+
+                {/* Direct Text Input for Crop */}
+                <input
+                  type="text"
+                  value={farmSetup.crop || ''}
+                  onChange={(e) => setFarmSetup(prev => ({ ...prev, crop: e.target.value }))}
+                  placeholder={t('customCropPlaceholder') || 'Type crop name (e.g. Tomato, Chilli, Mustard, Papaya)...'}
+                  style={{
+                    ...inputStyle,
+                    borderColor: 'var(--primary-400)',
+                    backgroundColor: '#f8fafc',
+                    fontWeight: 700,
+                    fontSize: '0.95rem'
+                  }}
+                />
+
+                {/* Popular Crop Preset Chips */}
+                <div style={{ marginTop: '10px' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--neutral-500)', marginBottom: '6px', textTransform: 'uppercase' }}>
+                    Popular Crops:
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {CROPS_LIST.filter(c => c.id !== 'CUSTOM').map(crop => {
+                      const isSelected = (farmSetup.crop || '').toLowerCase() === crop.name.toLowerCase() || (farmSetup.crop || '').toLowerCase() === crop.id.toLowerCase();
+                      return (
+                        <button
+                          key={crop.id}
+                          type="button"
+                          onClick={() => handleCropPresetClick(crop.name)}
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '16px',
+                            border: isSelected ? '1.5px solid var(--primary-600)' : '1px solid var(--neutral-300)',
+                            backgroundColor: isSelected ? 'var(--primary-100)' : '#ffffff',
+                            color: isSelected ? 'var(--primary-900)' : 'var(--neutral-700)',
+                            fontSize: '0.78rem',
+                            fontWeight: isSelected ? 700 : 600,
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            transition: 'all 0.15s ease'
+                          }}
+                        >
+                          <span>{crop.icon}</span>
+                          <span>{crop.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
-              {/* Field 4: Crop Growth Stage */}
-              <div>
-                <label style={labelStyle}>
-                  <span>{t('labelStage')}</span>
-                </label>
-                <select
-                  value={farmSetup.growthStage}
-                  onChange={(e) => setFarmSetup(prev => ({ ...prev, growthStage: e.target.value }))}
-                  style={inputStyle}
-                >
-                  {GROWTH_STAGES_LIST.map(stage => (
-                    <option key={stage.id} value={stage.id}>{stage.name}</option>
-                  ))}
-                </select>
+              {/* Grid row for Soil & Stage */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                
+                {/* Field 3: Soil Type */}
+                <div>
+                  <label style={labelStyle}>
+                    <span>{t('labelSoil')}</span>
+                  </label>
+                  <select
+                    value={farmSetup.soilType}
+                    onChange={(e) => setFarmSetup(prev => ({ ...prev, soilType: e.target.value }))}
+                    style={inputStyle}
+                  >
+                    {SOIL_TYPES_LIST.map(soil => (
+                      <option key={soil.id} value={soil.id}>{soil.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Field 4: Crop Growth Stage */}
+                <div>
+                  <label style={labelStyle}>
+                    <span>{t('labelStage')}</span>
+                  </label>
+                  <select
+                    value={farmSetup.growthStage}
+                    onChange={(e) => setFarmSetup(prev => ({ ...prev, growthStage: e.target.value }))}
+                    style={inputStyle}
+                  >
+                    {GROWTH_STAGES_LIST.map(stage => (
+                      <option key={stage.id} value={stage.id}>{stage.name}</option>
+                    ))}
+                  </select>
+                </div>
+
               </div>
 
               {/* Field 5: Farm Size (Acres) */}
-              <div style={{ gridColumn: '1 / -1' }}>
+              <div>
                 <label style={labelStyle}>
                   <span>{t('labelSize')}: <strong style={{ color: 'var(--primary-800)' }}>{farmSetup.farmSize} Acres</strong></span>
                 </label>
@@ -345,10 +375,10 @@ const labelStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '6px',
-  fontSize: '0.85rem',
+  fontSize: '0.88rem',
   fontWeight: 700,
-  color: 'var(--neutral-700)',
-  marginBottom: '6px'
+  color: 'var(--neutral-800)',
+  margin: 0
 };
 
 const inputStyle = {
@@ -359,7 +389,8 @@ const inputStyle = {
   fontSize: '0.9rem',
   color: 'var(--neutral-800)',
   backgroundColor: '#ffffff',
-  outline: 'none'
+  outline: 'none',
+  boxSizing: 'border-box'
 };
 
 const weatherCardStyle = {

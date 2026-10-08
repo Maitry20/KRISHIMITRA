@@ -42,7 +42,6 @@ export const PRESET_LOCATIONS = [
   { name: 'Rajkot, Gujarat', temp: 36, humidity: 38, rainProb: 10, rainfall: 0.2, wind: 18, condition: 'Hot & Dry' },
   { name: 'Nashik, Maharashtra', temp: 28, humidity: 78, rainProb: 75, rainfall: 14.5, wind: 16, condition: 'Rain Expected' },
   { name: 'Ludhiana, Punjab', temp: 31, humidity: 55, rainProb: 20, rainfall: 1.2, wind: 10, condition: 'Partly Cloudy' },
-  { name: 'CUSTOM', name: '✏️ Enter Custom Location...', temp: 30, humidity: 50, rainProb: 15, rainfall: 0.5, wind: 12, condition: 'Clear' },
 ];
 
 export function evaluateVirtualIrrigationAI(farmSetup, weatherData, diseaseResult = null) {
