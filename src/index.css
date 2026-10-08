@@ -1,0 +1,324 @@
+/* KRISHI-MITRA - AI-Based Farming Assistant Design System */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-900: #0f291e;
+  --primary-800: #1b4332;
+  --primary-700: #2d6a4f;
+  --primary-600: #40916c;
+  --primary-500: #52b788;
+  --primary-400: #74c69d;
+  --primary-200: #b7e4c7;
+  --primary-100: #d8f3dc;
+  --primary-50:  #f0fdf4;
+
+  --earth-800: #5c3d2e;
+  --earth-600: #8c5319;
+  --earth-500: #b07d47;
+  --earth-200: #e9c46a;
+  --earth-100: #fefae0;
+
+  --water-600: #0284c7;
+  --water-500: #0ea5e9;
+  --water-400: #38bdf8;
+  --water-100: #e0f2fe;
+
+  --danger-500: #ef4444;
+  --danger-100: #fee2e2;
+
+  --warning-500: #f59e0b;
+  --warning-100: #fef3c7;
+
+  --neutral-900: #0f172a;
+  --neutral-800: #1e293b;
+  --neutral-700: #334155;
+  --neutral-600: #475569;
+  --neutral-400: #94a3b8;
+  --neutral-200: #e2e8f0;
+  --neutral-100: #f8fafc;
+  --neutral-50:  #ffffff;
+
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-glow: 0 0 20px rgba(82, 183, 136, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #f4f8f5;
+  color: var(--neutral-800);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+/* Animations */
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes sway-reverse {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-3deg); }
+}
+
+@keyframes waterFlow {
+  0% { stroke-dashoffset: 40; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 15px rgba(82, 183, 136, 0.4); }
+  50% { box-shadow: 0 0 25px rgba(82, 183, 136, 0.8); }
+}
+
+@keyframes pumpPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+@keyframes laserScan {
+  0% { top: 0%; opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.8; }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes sensorPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.animate-sway {
+  animation: sway 4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-sway-rev {
+  animation: sway-reverse 5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.animate-water-flow {
+  stroke-dasharray: 8 4;
+  animation: waterFlow 1s linear infinite;
+}
+
+.animate-pump {
+  animation: pumpPulse 1.2s ease-in-out infinite;
+}
+
+.animate-laser {
+  animation: laserScan 2s ease-in-out infinite alternate;
+}
+
+.animate-float {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-sensor {
+  animation: sensorPulse 2s ease-in-out infinite;
+}
+
+/* Glass & Card Utility Styles */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(82, 183, 136, 0.4);
+}
+
+.card-elevated {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--neutral-200);
+  box-shadow: var(--shadow-md);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Science Fair Badge Header */
+.badge-gcet {
+  background: linear-gradient(135deg, var(--primary-800), var(--primary-700));
+  color: #ffffff;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(27, 67, 50, 0.25);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 5px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--primary-600);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(45, 106, 79, 0.4);
+  border: 2px solid #ffffff;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  background: var(--primary-700);
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-900);
+  margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  font-size: 0.95rem;
+  color: var(--neutral-600);
+  margin-bottom: 1.75rem;
+}
+
+/* Cinematic Story Scroll Animation System */
+.story-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.story-reveal.story-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.story-stagger-1 { transition-delay: 0.1s; }
+.story-stagger-2 { transition-delay: 0.2s; }
+.story-stagger-3 { transition-delay: 0.3s; }
+.story-stagger-4 { transition-delay: 0.4s; }
+
+@keyframes signalPulse {
+  0% { stroke-dashoffset: 60; opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.4; }
+}
+
+.animate-signal-stream {
+  stroke-dasharray: 8 6;
+  animation: signalPulse 1.8s linear infinite;
+}
+
+@keyframes nodeGlowPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(82, 183, 136, 0.4)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 16px rgba(82, 183, 136, 0.8)); }
+}
+
+.animate-ai-node {
+  animation: nodeGlowPulse 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .animate-signal-stream,
+  .animate-ai-node,
+  .animate-water-flow,
+  .animate-laser {
+    animation: none !important;
+  }
+}
+
+/* Scoped Premium Section Clip-Path Wipe Transition Layer */
+.pierc-clip-section {
+  position: relative;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center center;
+}
+
+.pierc-section-transition {
+  position: relative;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pierc-clip-section {
+    clip-path: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+    transition: none !important;
+  }
+}
