@@ -4,7 +4,7 @@ import { analyzeUploadedLeafImage } from '../utils/leafAnalyzer';
 import { TRANSLATIONS } from '../utils/translations';
 import { Upload, Camera, Leaf, CheckCircle, AlertTriangle, ShieldAlert, Sparkles, RefreshCw, Link2 } from 'lucide-react';
 
-export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, currentLang = 'en' }) {
+export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, farmSetup = {}, currentLang = 'en' }) {
   const t = (key) => TRANSLATIONS[currentLang]?.[key] || TRANSLATIONS.en[key] || key;
   const [selectedLeaf, setSelectedLeaf] = useState(null);
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
@@ -15,12 +15,20 @@ export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, cu
   const [dragActive, setDragActive] = useState(false);
   const [pixelStats, setPixelStats] = useState({ healthyPct: 0, darkSpotPct: 0, rustPct: 0, powderyPct: 0 });
 
+  const [examCropName, setExamCropName] = useState(farmSetup.crop || 'Tomato');
+
+  useEffect(() => {
+    if (farmSetup.crop && farmSetup.crop !== examCropName) {
+      setExamCropName(farmSetup.crop);
+    }
+  }, [farmSetup.crop]);
+
   // Camera Live Capture state
   const [isCameraActive, setIsCameraActive] = useState(false);
   const videoRef = useRef(null);
 
   // Trigger analysis whenever leaf or image selection changes
-  const startAnalysis = async (leafData, imageSrc = null) => {
+  const startAnalysis = async (leafData, imageSrc = null, overrideCrop = null) => {
     setHasAnalyzed(true);
     setSelectedLeaf(leafData);
     const targetSrc = imageSrc || leafData?.imageSrc;
@@ -31,11 +39,14 @@ export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, cu
     setAnalysisProgress(15);
     setDisplayedConfidence(0);
 
-    // Perform real computer vision pixel analysis
-    const realAnalysis = await analyzeUploadedLeafImage(targetSrc);
+    const activeCrop = overrideCrop || examCropName || leafData?.crop || farmSetup.crop || 'Crop';
+
+    // Perform real computer vision pixel analysis tuned for the specified crop
+    const realAnalysis = await analyzeUploadedLeafImage(targetSrc, activeCrop);
 
     const mergedResult = {
       ...(leafData || {}),
+      crop: activeCrop,
       status: realAnalysis.status,
       condition: realAnalysis.condition,
       severity: realAnalysis.severity,
@@ -269,6 +280,40 @@ export default function AIPlantHealthCheck({ diseaseResult, setDiseaseResult, cu
                     />
                   </label>
                 </div>
+              </div>
+
+              {/* Target Crop Entry for Examination */}
+              <div style={{
+                marginBottom: '16px',
+                padding: '10px 14px',
+                borderRadius: '10px',
+                backgroundColor: '#f0fdf4',
+                border: '1px solid var(--primary-300)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary-900)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Leaf size={16} color="var(--primary-700)" />
+                  {t('lblExamCrop')}:
+                </span>
+                <input
+                  type="text"
+                  value={examCropName}
+                  onChange={(e) => setExamCropName(e.target.value)}
+                  placeholder="e.g., Tomato, Chilli, Mustard, Wheat..."
+                  style={{
+                    flex: 1,
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--neutral-300)',
+                    fontSize: '0.88rem',
+                    fontWeight: 700,
+                    color: 'var(--primary-900)',
+                    backgroundColor: '#ffffff',
+                    outline: 'none'
+                  }}
+                />
               </div>
 
               {/* Upload Dropzone / Camera Viewfinder */}

@@ -3,7 +3,7 @@
  * Extracts chlorophyll ratio, necrotic spot density, rust pustule index & classifies leaf health.
  */
 
-export function analyzeUploadedLeafImage(imageElementOrSrc) {
+export function analyzeUploadedLeafImage(imageElementOrSrc, targetCrop = 'Crop') {
   return new Promise((resolve) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
@@ -65,38 +65,40 @@ export function analyzeUploadedLeafImage(imageElementOrSrc) {
         const rustPct = Math.round((rustCount / validCount) * 100);
         const powderyPct = Math.round((powderyCount / validCount) * 100);
 
+        const cropDisplayName = targetCrop || 'Crop';
+
         // Classification Decision Tree based on actual pixel distribution
         let status = 'Healthy';
-        let condition = 'Healthy / High Chlorophyll Integrity';
+        let condition = `Healthy / High Chlorophyll Integrity (${cropDisplayName})`;
         let severity = 'None';
         let confidence = Math.min(98, Math.max(88, 85 + Math.round(healthyPct * 0.13)));
-        let symptoms = `Extracted real chlorophyll index (${healthyPct}%), intact cell margin structure, and minimal spot discoloration (${darkSpotPct}%).`;
-        let recommendation = 'Plant canopy is healthy! Maintain regular Virtual AI Drip Irrigation schedule.';
+        let symptoms = `Extracted real chlorophyll index (${healthyPct}%), intact cell margin structure, and minimal spot discoloration (${darkSpotPct}%) on ${cropDisplayName} leaf.`;
+        let recommendation = `${cropDisplayName} canopy is healthy! Maintain regular Virtual AI Drip Irrigation schedule.`;
         let organicTreatment = 'No treatment required.';
 
         if (powderyPct >= 18) {
           status = 'Needs Attention';
-          condition = 'Possible Powdery Mildew Fungal Infection';
+          condition = `Possible Powdery Mildew Infection (${cropDisplayName})`;
           severity = 'Severe';
           confidence = Math.min(97, 88 + Math.round(powderyPct * 0.2));
-          symptoms = `Extracted ${powderyPct}% pale powdery fungal spore coating across leaf surface with localized cell chlorosis.`;
-          recommendation = 'Improve canopy airflow around plants. Apply organic bio-fungicide or potassium bicarbonate dilution.';
-          organicTreatment = 'Spray organic sulfur dust or neem oil emulsion early morning.';
+          symptoms = `Extracted ${powderyPct}% pale powdery fungal spore coating across ${cropDisplayName} leaf surface with chlorosis.`;
+          recommendation = `Improve canopy airflow around ${cropDisplayName} plants. Apply organic bio-fungicide or potassium bicarbonate dilution.`;
+          organicTreatment = 'Spray organic sulfur dust or neem oil emulsion early in the morning.';
         } else if (darkSpotPct >= 14 || (darkSpotPct > 8 && rustPct > 8)) {
           status = 'Needs Attention';
-          condition = 'Possible Leaf Spot / Necrotic Blight (Alternaria/Phytophthora)';
+          condition = `Possible Leaf Spot / Necrotic Blight on ${cropDisplayName}`;
           severity = darkSpotPct >= 22 ? 'Severe' : 'Moderate';
           confidence = Math.min(96, 87 + Math.round(darkSpotPct * 0.25));
-          symptoms = `Detected ${darkSpotPct}% dark brown/black necrotic spot lesions with chlorotic yellow halos.`;
-          recommendation = 'Isolate infected foliage immediately. Adjust virtual irrigation timing to keep leaf canopy dry and avoid fungal dispersal.';
+          symptoms = `Detected ${darkSpotPct}% dark brown/black necrotic spot lesions on ${cropDisplayName} foliage with chlorotic yellow halos.`;
+          recommendation = `Isolate infected ${cropDisplayName} foliage immediately. Adjust virtual irrigation timing to keep canopy dry.`;
           organicTreatment = 'Apply copper-based bio-fungicide or neem oil extract as per organic farming guidelines.';
         } else if (rustPct >= 10 || (healthyPct < 35 && darkSpotPct < 14)) {
           status = 'Needs Attention';
-          condition = 'Possible Foliar Leaf Rust / Chlorosis';
+          condition = `Possible Foliar Leaf Rust / Chlorosis on ${cropDisplayName}`;
           severity = 'High';
           confidence = Math.min(95, 86 + Math.round(rustPct * 0.3));
-          symptoms = `Detected ${rustPct}% yellowish-orange rust pustule signatures and localized chlorophyll breakdown.`;
-          recommendation = 'Avoid overhead watering. Ensure proper plant spacing and prune lower infected leaves.';
+          symptoms = `Detected ${rustPct}% yellowish-orange rust pustule signatures on ${cropDisplayName} leaf.`;
+          recommendation = `Avoid overhead watering for ${cropDisplayName}. Ensure proper plant spacing and prune lower infected leaves.`;
           organicTreatment = 'Spray bio-control sulfur dust or organic compost tea emulsion.';
         }
 
@@ -116,14 +118,15 @@ export function analyzeUploadedLeafImage(imageElementOrSrc) {
           }
         });
       } catch (err) {
+        const cropDisplayName = targetCrop || 'Crop';
         // Fallback if canvas security blocks cross-origin SVG
         resolve({
           status: 'Needs Attention',
-          condition: 'Foliar Leaf Spot Detected',
+          condition: `Foliar Leaf Spot Detected on ${cropDisplayName}`,
           severity: 'Moderate',
           confidence: 91,
-          symptoms: 'Extracted leaf margin discoloration and micro-spotting patterns.',
-          recommendation: 'Inspect foliage for fungal spores or pest vectors.',
+          symptoms: `Extracted leaf margin discoloration and micro-spotting patterns on ${cropDisplayName}.`,
+          recommendation: `Inspect ${cropDisplayName} foliage for fungal spores or pest vectors.`,
           organicTreatment: 'Apply organic neem oil extract.',
           pixelStats: { healthyPct: 58, darkSpotPct: 18, rustPct: 12, powderyPct: 5 }
         });
@@ -131,13 +134,14 @@ export function analyzeUploadedLeafImage(imageElementOrSrc) {
     };
 
     img.onerror = () => {
+      const cropDisplayName = targetCrop || 'Crop';
       resolve({
         status: 'Needs Attention',
-        condition: 'Leaf Spot Discoloration Detected',
+        condition: `Leaf Spot Discoloration Detected on ${cropDisplayName}`,
         severity: 'Moderate',
         confidence: 90,
-        symptoms: 'Observed leaf spot lesions and chlorophyll degradation.',
-        recommendation: 'Inspect under-leaf surfaces and improve air circulation.',
+        symptoms: `Observed leaf spot lesions and chlorophyll degradation on ${cropDisplayName}.`,
+        recommendation: `Inspect under-leaf surfaces of ${cropDisplayName} and improve air circulation.`,
         organicTreatment: 'Apply organic bio-fungicide.',
         pixelStats: { healthyPct: 60, darkSpotPct: 16, rustPct: 10, powderyPct: 4 }
       });

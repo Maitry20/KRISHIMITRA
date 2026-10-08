@@ -112,6 +112,7 @@ export default function App() {
         <AIPlantHealthCheck
           diseaseResult={diseaseResult}
           setDiseaseResult={setDiseaseResult}
+          farmSetup={farmSetup}
           currentLang={currentLang}
         />
 

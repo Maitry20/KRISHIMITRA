@@ -10,7 +10,14 @@ export const CROPS_LIST = [
   { id: 'Tomato', name: 'Tomato', icon: '🍅', baseLitrePerAcre: 2400, etiFactor: 1.2 },
   { id: 'Maize', name: 'Maize', icon: '🌽', baseLitrePerAcre: 2000, etiFactor: 1.0 },
   { id: 'Groundnut', name: 'Groundnut', icon: '🥜', baseLitrePerAcre: 1600, etiFactor: 0.8 },
-  { id: 'Other', name: 'Other Crop', icon: '🍃', baseLitrePerAcre: 2000, etiFactor: 1.0 },
+  { id: 'Potato', name: 'Potato', icon: '🥔', baseLitrePerAcre: 2100, etiFactor: 1.1 },
+  { id: 'Sugarcane', name: 'Sugarcane', icon: '🎋', baseLitrePerAcre: 3800, etiFactor: 1.6 },
+  { id: 'Mustard', name: 'Mustard', icon: '🌼', baseLitrePerAcre: 1700, etiFactor: 0.85 },
+  { id: 'Chilli', name: 'Chilli', icon: '🌶️', baseLitrePerAcre: 2300, etiFactor: 1.15 },
+  { id: 'Mango', name: 'Mango', icon: '🥭', baseLitrePerAcre: 2800, etiFactor: 1.3 },
+  { id: 'Onion', name: 'Onion', icon: '🧅', baseLitrePerAcre: 1900, etiFactor: 0.9 },
+  { id: 'Brinjal', name: 'Brinjal (Eggplant)', icon: '🍆', baseLitrePerAcre: 2250, etiFactor: 1.1 },
+  { id: 'CUSTOM', name: '✏️ Enter Custom Crop...', icon: '🍃', baseLitrePerAcre: 2000, etiFactor: 1.0 },
 ];
 
 export const SOIL_TYPES_LIST = [
@@ -35,10 +42,48 @@ export const PRESET_LOCATIONS = [
   { name: 'Rajkot, Gujarat', temp: 36, humidity: 38, rainProb: 10, rainfall: 0.2, wind: 18, condition: 'Hot & Dry' },
   { name: 'Nashik, Maharashtra', temp: 28, humidity: 78, rainProb: 75, rainfall: 14.5, wind: 16, condition: 'Rain Expected' },
   { name: 'Ludhiana, Punjab', temp: 31, humidity: 55, rainProb: 20, rainfall: 1.2, wind: 10, condition: 'Partly Cloudy' },
+  { name: 'CUSTOM', name: '✏️ Enter Custom Location...', temp: 30, humidity: 50, rainProb: 15, rainfall: 0.5, wind: 12, condition: 'Clear' },
 ];
 
 export function evaluateVirtualIrrigationAI(farmSetup, weatherData, diseaseResult = null) {
-  const crop = CROPS_LIST.find(c => c.id === farmSetup.crop) || CROPS_LIST[3];
+  let rawCropInput = farmSetup.crop || 'Tomato';
+  
+  // Look up in presets list
+  let crop = CROPS_LIST.find(c => 
+    c.id.toLowerCase() === rawCropInput.toLowerCase() || 
+    c.name.toLowerCase() === rawCropInput.toLowerCase()
+  );
+
+  // If farmer entered a custom crop name not in presets list
+  if (!crop || crop.id === 'CUSTOM') {
+    const customName = (rawCropInput === 'CUSTOM' ? farmSetup.customCropName : rawCropInput) || 'Custom Crop';
+    
+    // Dynamic crop water demand heuristic based on crop characteristics
+    let baseLitre = 2100;
+    let eti = 1.0;
+    let icon = '🌿';
+    const lower = customName.toLowerCase();
+    
+    if (lower.includes('mustard') || lower.includes('sarson') || lower.includes('seed')) { baseLitre = 1700; eti = 0.85; icon = '🌼'; }
+    else if (lower.includes('chilli') || lower.includes('pepper') || lower.includes('mirchi')) { baseLitre = 2300; eti = 1.15; icon = '🌶️'; }
+    else if (lower.includes('mango') || lower.includes('fruit') || lower.includes('orchard')) { baseLitre = 2800; eti = 1.3; icon = '🥭'; }
+    else if (lower.includes('water') || lower.includes('melon') || lower.includes('gourd')) { baseLitre = 2500; eti = 1.25; icon = '🍉'; }
+    else if (lower.includes('onion') || lower.includes('garlic') || lower.includes('pyaz')) { baseLitre = 1900; eti = 0.9; icon = '🧅'; }
+    else if (lower.includes('potato') || lower.includes('aloo')) { baseLitre = 2100; eti = 1.1; icon = '🥔'; }
+    else if (lower.includes('sugarcane') || lower.includes('ganna')) { baseLitre = 3800; eti = 1.6; icon = '🎋'; }
+    else if (lower.includes('pulses') || lower.includes('dal') || lower.includes('gram') || lower.includes('bean')) { baseLitre = 1500; eti = 0.75; icon = '🫘'; }
+    else if (lower.includes('banana') || lower.includes('kela')) { baseLitre = 3200; eti = 1.4; icon = '🍌'; }
+    else if (lower.includes('papaya')) { baseLitre = 2600; eti = 1.2; icon = '🍈'; }
+
+    crop = {
+      id: customName,
+      name: customName,
+      icon,
+      baseLitrePerAcre: baseLitre,
+      etiFactor: eti,
+    };
+  }
+
   const soil = SOIL_TYPES_LIST.find(s => s.id === farmSetup.soilType) || SOIL_TYPES_LIST[1];
   const stage = GROWTH_STAGES_LIST.find(g => g.id === farmSetup.growthStage) || GROWTH_STAGES_LIST[2];
   const acres = Math.max(1, Math.min(100, Number(farmSetup.farmSize) || 2));
@@ -90,7 +135,7 @@ export function evaluateVirtualIrrigationAI(farmSetup, weatherData, diseaseResul
 
   // Disease Override Advisory
   if (diseaseResult && diseaseResult.severity && diseaseResult.severity !== 'None') {
-    todayAdvice += ` Note: ${diseaseResult.title} detected. Avoid excessive foliage wetting to minimize fungal pathogen spread.`;
+    todayAdvice += ` Note: ${diseaseResult.title || diseaseResult.condition} detected on ${crop.name}. Avoid excessive foliage wetting to minimize fungal pathogen spread.`;
   }
 
   // 3. Water Requirement Estimation
